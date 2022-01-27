@@ -21,4 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.hello),
     path('movies/', views.getMovies),
+    path('collection/', views.getCollections),
+    path('collection/<int:id>', views.getCollection)
 ]
