@@ -1,11 +1,12 @@
 from gc import collect
-from django.http import HttpResponse
+from pydoc import describe
+from unicodedata import name
+from django.http import HttpResponse, JsonResponse
 import requests
 from requests.auth import HTTPBasicAuth
 import json
 
 from .models import Users, Collections
-from django.core import serializers
 
 moviesEndpoint = 'https://demo.credy.in/api/v1/maya/movies'
 local_moviesEndpoint = 'http://localhost:8000/movies'
@@ -51,7 +52,16 @@ def getMovies(req):
     if('count' in response):
         urlExchange(response)
 
-    return HttpResponse(json.dumps(response))
+    return JsonResponse(response)
+
+def getCollection(req, id):
+    collection = Collections.objects.filter(userid=USERID, id=id)
+
+    if(len(collection) == 0):
+        return JsonResponse({'message': f'User does not have a collection with id {id}'})
+    
+    collection = collection[0].toDictionary(True)
+    return JsonResponse(collection)
 
 def getCollections(req):
     collections = Collections.objects.filter(userid=USERID)
@@ -65,13 +75,29 @@ def getCollections(req):
     for c in collections:
         result['data']['collections'].append(c.toDictionary(False))
 
-    return HttpResponse(json.dumps(result))
+    return JsonResponse(result)
 
-def getCollection(req, id):
-    collection = Collections.objects.filter(userid=USERID, id=id)
+def addCollection(req):
+    data = json.loads(req.body)
+    requiredFields = {'title', 'description', 'movies'}
 
-    if(len(collection) == 0):
-        return HttpResponse(json.dumps({'message': f'User does not have a collection with id {id}'}))
-    
-    collection = collection[0].toDictionary(True)
-    return HttpResponse(json.dumps(collection))
+    if(set(data.keys()) != requiredFields):
+        return JsonResponse({'message': 'one or more fields are not present | make sure all the fields are in lowercase'})
+
+    newCollection = Collections(
+        name = data['title'],
+        description = data['description'],
+        movies = json.dumps(data['movies']),
+        userid = Users.objects.get(id=USERID)
+    )
+
+    newCollection.save()
+    return JsonResponse({'collection_uuid': newCollection.id})
+
+def get_add_Collections(req):
+    if(req.method == 'POST'):
+        return addCollection(req)
+    elif(req.method == 'GET'):
+        return getCollections(req)
+    else:
+        return JsonResponse({'message': f'No such endpoint {req.method} /collection'})
