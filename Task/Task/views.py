@@ -1,6 +1,3 @@
-from gc import collect
-from pydoc import describe
-from unicodedata import name
 from django.http import HttpResponse, JsonResponse
 import requests
 from requests.auth import HTTPBasicAuth
@@ -41,7 +38,7 @@ def makeRequest(req):
 
     return response    
 
-# -------------------------------------------------------------
+# --------------------------------------------------------------
 
 def hello(req):
     return HttpResponse('Hello World')
@@ -54,6 +51,8 @@ def getMovies(req):
 
     return JsonResponse(response)
 
+# --------------------------------------------------------------
+
 def getCollection(req, id):
     collection = Collections.objects.filter(userid=USERID, id=id)
 
@@ -62,6 +61,47 @@ def getCollection(req, id):
     
     collection = collection[0].toDictionary(True)
     return JsonResponse(collection)
+
+def updateHelper(data, collection):
+    if('title' in data and data['title'] is not None):
+        collection.name = data['title']
+    
+    if('description' in data and data['description'] is not None):
+        collection.description = data['description']
+    
+    if('movies' in data and data['movies'] is not None):
+        collection.movies = data['movies']
+
+def updateCollection(req, id):
+    data = json.loads(req.body)
+    collection = Collections.objects.filter(userid=USERID, id=id)
+
+    if(len(collection) == 0):
+        return JsonResponse({'message': f'User does not have a collection with id {id}'})
+
+    collection = collection[0]
+    updateHelper(data, collection)
+
+    try:
+        collection.save()
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
+    return JsonResponse({'message':f'Updated the collection {id}'})
+
+def deleteCollection(req, id):
+    return HttpResponse('deleting')
+
+def get_update_delete_Collection(req, id):
+    if(req.method == 'GET'):
+        return getCollection(req, id)
+    elif(req.method == 'PUT'):
+        return updateCollection(req, id)
+    elif(req.method == 'DELETE'):
+        return deleteCollection(req, id)
+    else:
+        return JsonResponse({'message': f'No such endpoint {req.method} /collection/id'})
+
+# --------------------------------------------------------------
 
 def getCollections(req):
     collections = Collections.objects.filter(userid=USERID)

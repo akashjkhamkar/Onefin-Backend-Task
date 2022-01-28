@@ -22,5 +22,5 @@ urlpatterns = [
     path('', views.hello),
     path('movies', views.getMovies),
     path('collection', views.get_add_Collections),
-    path('collection/<int:id>', views.getCollection)
+    path('collection/<int:id>', views.get_update_delete_Collection)
 ]
