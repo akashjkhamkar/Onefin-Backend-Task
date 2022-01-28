@@ -8,7 +8,7 @@ from ..models import Users
 
 def login_required(f):
     @wraps(f)
-    def decorated_function(req):
+    def decorated_function(req, *args, **kwargs):
         token = req.META.get('HTTP_AUTHORIZATION')
         if(token is None):
             return JsonResponse({'error':'No token provided | User is not authenticated'})
@@ -18,8 +18,9 @@ def login_required(f):
         try:
             payload = jwt.decode(token, key='secretstuff', algorithms=['HS256'])
             req.USERID = payload['id']
-            return f(req)
+            return f(req, *args, **kwargs)
         except Exception as e:
+            print(e)
             return JsonResponse({'error':'Invalid token | Please login again'})
 
     return decorated_function
