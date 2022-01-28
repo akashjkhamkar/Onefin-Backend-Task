@@ -1,0 +1,64 @@
+GET https://demo.credy.in/api/v1/maya/movies/
+Authorization: Basic iNd3jDMYRKsN1pjQPMRz2nrq7N99q4Tsp9EY9cM0:Ne5DoTQt7p8qrgkPdtenTK8zd6MorcCR5vXZIJNfJwvfafZfcOs4reyasVYddTyXCz9hcL5FGGIVxw3q02ibnBLhblivqQTp4BIC93LZHj4OppuHQUzwugcYu7TIC5H1
+
+###
+GET http://localhost:8000/collection
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Nn0.0QJl6oknamSYnAC67FkzRU6QH0oo2NydyFAopOqzeRA
+
+###
+GET http://localhost:8000/collection/18
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Nn0.0QJl6oknamSYnAC67FkzRU6QH0oo2NydyFAopOqzeRA
+
+###
+GET http://localhost:8000/movies
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NX0._z8RFqM48_S057UlNojCAEcHqwU_p2bNvJ4fwsp7auI
+
+###
+GET http://localhost:8000
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NX0._z8RFqM48_S057UlNojCAEcHqwU_p2bNvJ4fwsp7auI
+
+###
+POST http://localhost:8000/collection 
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6Nn0.0QJl6oknamSYnAC67FkzRU6QH0oo2NydyFAopOqzeRA
+
+{
+    "title": "Favourites",
+    "description": "Favourite movies",
+    "movies": [
+        {
+            "name": "superbad",
+            "time": "40 min",
+            "genres": "comedy"
+        }
+    ]
+}
+
+###
+PUT http://localhost:8000/collection/18
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NX0._z8RFqM48_S057UlNojCAEcHqwU_p2bNvJ4fwsp7auI
+
+{
+    "title": "Gravity falls 2",
+    "description": "stories from gravity falls",
+    "movies": [
+        {
+            "name": "Season 1",
+            "time": "40 min",
+            "genres": "art,mystery"
+        }
+    ]
+}
+
+###
+DELETE  http://localhost:8000/collection/17
+
+###
+POST http://localhost:8000/register
+Content-Type: application/json
+
+{
+    "password": "akash",
+    "username": "akash"
+}
