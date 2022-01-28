@@ -6,6 +6,8 @@ from functools import wraps
 
 from ..models import Users
 
+# this file contains all the functions and decorators needed for authentication
+
 def login_required(f):
     @wraps(f)
     def decorated_function(req, *args, **kwargs):
@@ -40,23 +42,22 @@ def registerUser(req):
     elif(data['username'] == '' or data['password'] == ''):
         return JsonResponse({'message': 'username or password can not be empty!'})
 
-    # checks if the user already exists or not
-    queryResults = None
     try:
+        # checks if the user already exists or not
         queryResults = Users.objects.filter(name=data['username'])
+
+        # if username does not exist, create a new user
+        # if user does exist, verify the password
+        user = None
+        if(len(queryResults) == 0):
+            hashedPassword = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
+            user = Users(name=data['username'], password=hashedPassword.decode('utf8'))
+            user.save()
+        else:
+            user = queryResults[0]
+            if(not bcrypt.checkpw(data['password'].encode('utf8'), user.password.encode('utf8'))):
+                return JsonResponse({'error': 'username or password is wrong'})
+
+        return JsonResponse({'access_token': createToken(user.id)})
     except Exception as e:
         return JsonResponse({'error': str(e)})
-
-    # if username does not exist, create a new user
-    # if user does exist, verify the password
-    user = None
-    if(len(queryResults) == 0):
-        hashedPassword = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
-        user = Users(name=data['username'], password=hashedPassword.decode('utf8'))
-        user.save()
-    else:
-        user = queryResults[0]
-        if(not bcrypt.checkpw(data['password'].encode('utf8'), user.password.encode('utf8'))):
-            return JsonResponse({'error': 'username or password is wrong'})
-
-    return JsonResponse({'access_token': createToken(user.id)})
