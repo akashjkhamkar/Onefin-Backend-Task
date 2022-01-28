@@ -22,4 +22,4 @@ live - https://onefin-backend-task-akash.herokuapp.com/
 	- logging with a username for a first time will create a new user, next time make sure you 	 use the exact same password 
 	- (both sign in and log in activites happen on the /register route)
 2. Use the received token to make the further requests, make sure you set the authorization field to -
-Bearer < Token >
+``Bearer < Token >``
