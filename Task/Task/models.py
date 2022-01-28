@@ -19,7 +19,7 @@ class Collections(models.Model):
     def toDictionary(self, needMovies):
         dictionary = {}
         dictionary['uuid'] = self.id
-        dictionary['name'] = self.name
+        dictionary['title'] = self.name
         dictionary['description'] = self.description
         
         if needMovies:

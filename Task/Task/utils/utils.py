@@ -1,80 +1,19 @@
 from django.http import JsonResponse
-import requests
-from requests.auth import HTTPBasicAuth
 import json
 
 from ..models import Users, Collections
+from .helper import favouriteGenre, updateHelper, urlExchange, makeRequest 
 
-USERID = 1
+def getMovies(req):
+    response = makeRequest(req)
 
-moviesEndpoint = 'https://demo.credy.in/api/v1/maya/movies'
-local_moviesEndpoint = 'http://localhost:8000/movies'
-username = 'iNd3jDMYRKsN1pjQPMRz2nrq7N99q4Tsp9EY9cM0'
-password = 'Ne5DoTQt7p8qrgkPdtenTK8zd6MorcCR5vXZIJNfJwvfafZfcOs4reyasVYddTyXCz9hcL5FGGIVxw3q02ibnBLhblivqQTp4BIC93LZHj4OppuHQUzwugcYu7TIC5H1'
+    if('count' in response):
+        urlExchange(response)
 
-# ----------- helper functions
-
-def favouriteGenre(collections):
-    allgenres = {}
-
-    for c in collections:
-        c = c.toDictionary(True)
-        for movie in c['movies']:
-            if('genres' not in movie):
-                continue
-            
-            movieGenres = movie['genres'].split(',')
-
-            for genre in movieGenres:
-                if genre in allgenres:
-                    allgenres[genre] += 1
-                else:
-                    allgenres[genre] = 1
-
-    favourites = sorted(allgenres, key=allgenres.get, reverse=True)
-    return ','.join(favourites[:3])
-
-def updateHelper(data, collection):
-    if('title' in data and data['title'] is not None):
-        collection.name = data['title']
-    
-    if('description' in data and data['description'] is not None):
-        collection.description = data['description']
-    
-    if('movies' in data and data['movies'] is not None):
-        collection.movies = data['movies']
-
-def urlExchange(response):
-    nextlink = response['next']
-    prevlink = response['previous']
-
-    if(nextlink):
-        response['next'] = nextlink.replace(moviesEndpoint, local_moviesEndpoint)
-    
-    if(prevlink):
-        response['previous'] = prevlink.replace(moviesEndpoint, local_moviesEndpoint)
-
-def makeRequest(req):
-    url = moviesEndpoint
-    page = req.GET.get('page', '')
-    if(page):
-        url = moviesEndpoint + f'?page={page}'
-
-    response = None
-    
-    try:
-        response = requests.get(url, auth = HTTPBasicAuth(username, password)).json()
-    except Exception as e:
-        print("Error makeRequest(): ", e)
-        response = { 'message': 'Internal Server Error', 'detail': 'could not make requst to the movies api'}
-
-    return response    
-
-
-# --------------------------------------
+    return JsonResponse(response)
 
 def getCollection(req, id):
-    collection = Collections.objects.filter(userid=USERID, id=id)
+    collection = Collections.objects.filter(userid=req.USERID, id=id)
 
     if(len(collection) == 0):
         return JsonResponse({'message': f'User does not have a collection with id {id}'})
@@ -82,10 +21,9 @@ def getCollection(req, id):
     collection = collection[0].toDictionary(True)
     return JsonResponse(collection)
 
-
 def updateCollection(req, id):
     data = json.loads(req.body)
-    collection = Collections.objects.filter(userid=USERID, id=id)
+    collection = Collections.objects.filter(userid=req.USERID, id=id)
 
     if(len(collection) == 0):
         return JsonResponse({'message': f'User does not have a collection with id {id}'})
@@ -101,7 +39,7 @@ def updateCollection(req, id):
     return JsonResponse({'message':f'Updated the collection {id}'})
 
 def deleteCollection(req, id):
-    collection = Collections.objects.filter(userid=USERID, id=id).delete()
+    collection = Collections.objects.filter(userid=req.USERID, id=id).delete()
 
     if(collection[0] == 0):
         return JsonResponse({'message': f'User does not have a collection with id {id}'})
@@ -119,14 +57,14 @@ def addCollection(req):
         name = data['title'],
         description = data['description'],
         movies = {'movies': data['movies']},
-        userid = Users.objects.get(id=USERID)
+        userid = Users.objects.get(id=req.USERID)
     )
 
     newCollection.save()
     return JsonResponse({'collection_uuid': newCollection.id})
 
 def getCollections(req):
-    collections = Collections.objects.filter(userid=USERID)
+    collections = Collections.objects.filter(userid=req.USERID)
     result = {
         'is_success': True,
         'data': {
