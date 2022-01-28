@@ -1,3 +1,4 @@
+from math import factorial
 from django.http import HttpResponse, JsonResponse
 import requests
 from requests.auth import HTTPBasicAuth
@@ -86,10 +87,16 @@ def updateCollection(req, id):
         collection.save()
     except Exception as e:
         return JsonResponse({'error': str(e)})
+    
     return JsonResponse({'message':f'Updated the collection {id}'})
 
 def deleteCollection(req, id):
-    return HttpResponse('deleting')
+    collection = Collections.objects.filter(userid=USERID, id=id).delete()
+
+    if(collection[0] == 0):
+        return JsonResponse({'message': f'User does not have a collection with id {id}'})
+
+    return JsonResponse({'message': f'Deleted the collection {id}'})
 
 def get_update_delete_Collection(req, id):
     if(req.method == 'GET'):
@@ -103,13 +110,34 @@ def get_update_delete_Collection(req, id):
 
 # --------------------------------------------------------------
 
+def favouriteGenre(collections):
+    allgenres = {}
+
+    for c in collections:
+        c = c.toDictionary(True)
+        for movie in c['movies']:
+            if('genres' not in movie):
+                continue
+            
+            movieGenres = movie['genres'].split(',')
+
+            for genre in movieGenres:
+                if genre in allgenres:
+                    allgenres[genre] += 1
+                else:
+                    allgenres[genre] = 1
+
+    favourites = sorted(allgenres, key=allgenres.get, reverse=True)
+    return ','.join(favourites[:3])
+
 def getCollections(req):
     collections = Collections.objects.filter(userid=USERID)
     result = {
         'is_success': True,
         'data': {
             'collections': []
-        }
+        },
+        'favourite_genres': favouriteGenre(collections)
     }
 
     for c in collections:
@@ -127,7 +155,7 @@ def addCollection(req):
     newCollection = Collections(
         name = data['title'],
         description = data['description'],
-        movies = json.dumps(data['movies']),
+        movies = {'movies': data['movies']},
         userid = Users.objects.get(id=USERID)
     )
 
