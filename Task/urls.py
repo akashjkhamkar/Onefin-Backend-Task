@@ -20,7 +20,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.hello),
-    path('movies', views.movies),
+    path('movies/', views.movies),
     path('collection', views.get_add_Collections),
     path('collection/<int:id>', views.get_update_delete_Collection),
     path('register', views.register),

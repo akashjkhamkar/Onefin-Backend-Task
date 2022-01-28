@@ -33,7 +33,7 @@ def createToken(id):
         key="secretstuff"
     )
 
-    return token.decode('utf-8')
+    return token
 
 def registerUser(req):
     data = json.loads(req.body)
@@ -50,12 +50,12 @@ def registerUser(req):
         # if user does exist, verify the password
         user = None
         if(len(queryResults) == 0):
-            hashedPassword = bcrypt.hashpw(data['password'].encode('utf8'), bcrypt.gensalt())
-            user = Users(name=data['username'], password=hashedPassword.decode('utf8'))
+            hashedPassword = bcrypt.hashpw(data['password'], bcrypt.gensalt())
+            user = Users(name=data['username'], password=hashedPassword)
             user.save()
         else:
             user = queryResults[0]
-            if(not bcrypt.checkpw(data['password'].encode('utf8'), user.password.encode('utf8'))):
+            if(not bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8'))):
                 return JsonResponse({'error': 'username or password is wrong'})
 
         return JsonResponse({'access_token': createToken(user.id)})
