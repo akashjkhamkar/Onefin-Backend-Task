@@ -1,10 +1,16 @@
 import requests
 from requests.auth import HTTPBasicAuth
+from django.conf import settings
+
 
 moviesEndpoint = 'https://demo.credy.in/api/v1/maya/movies'
-local_moviesEndpoint = 'http://localhost:8000/movies'
+local_moviesEndpoint = 'https://onefin-backend-task-akash.herokuapp.com/movies'
 username = 'iNd3jDMYRKsN1pjQPMRz2nrq7N99q4Tsp9EY9cM0'
 password = 'Ne5DoTQt7p8qrgkPdtenTK8zd6MorcCR5vXZIJNfJwvfafZfcOs4reyasVYddTyXCz9hcL5FGGIVxw3q02ibnBLhblivqQTp4BIC93LZHj4OppuHQUzwugcYu7TIC5H1'
+
+if(settings.DEBUG):
+    print('DEBUG is on')
+    local_moviesEndpoint = 'http://localhost:8000/movies'
 
 # helper functions 
 
