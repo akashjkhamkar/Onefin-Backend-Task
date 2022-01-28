@@ -1,6 +1,6 @@
 # Onefin Backend Task
 ### Problem Statement
-We need to develop a web application which allows people to create collections of movies they like. There are two parts to this:
+Develop a web application which allows people to create collections of movies they like.
 
 ---
 #### Submission
